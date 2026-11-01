@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commandes ENP</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f5fb;
+    color: #172b4d;
+}
+
+header {
+    background: #073b78;
+    color: white;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+header p {
+    margin: 5px;
+    color: #d5e6ff;
+}
+
+main {
+    max-width: 750px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px #0000000c;
+}
+
+h2 {
+    color: #073b78;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccd6e5;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.document {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border: 1px solid #e0e7f0;
+    border-radius: 9px;
+    margin-bottom: 10px;
+}
+
+.document label {
+    margin: 0;
+    font-weight: normal;
+}
+
+.document input {
+    width: 18px;
+    height: 18px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #0755a5;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+button:hover {
+    background: #063b78;
+}
+
+.secondary {
+    background: #e8f1fc;
+    color: #073b78;
+}
+
+#recap, #admin {
+    display: none;
+}
+
+#message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #dce4ef;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #e8f1fc;
+    color: #073b78;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #718096;
+}
+/* DESIGN MOBILE */
+
+@media screen and (max-width: 600px) {
+
+    body {
+        font-size: 15px;
+    }
+
+    header {
+        padding: 25px 12px;
+    }
+
+    header h1 {
+        font-size: 23px;
+    }
+
+    header p {
+        font-size: 13px;
+    }
+
+    main {
+        width: 100%;
+        margin: 18px auto;
+        padding: 0 12px;
+    }
+
+    .card {
+        padding: 18px;
+        margin-bottom: 16px;
+        border-radius: 12px;
+    }
+
+    h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        min-height: 46px;
+        font-size: 16px;
+    }
+
+    .document {
+        padding: 13px;
+        gap: 10px;
+    }
+
+    .document label {
+        font-size: 14px;
+    }
+
+    .document input {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    button {
+        min-height: 48px;
+        font-size: 15px;
+    }
+
+    table {
+        min-width: 650px;
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        white-space: nowrap;
+    }
+
+    select {
+        min-height: 40px;
+        font-size: 14px;
+    }
+
+    footer {
+        font-size: 12px;
+    }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>COMMANDES ENP</h1>
+    <p>École Nationale Polytechnique</p>
+    <p>Plateforme de commande de documents</p>
+</header>
+
+<main>
+
+<section class="card">
+    <h2>01 — Informations de l'étudiant</h2>
+
+    <label for="nom">Nom et prénom</label>
+    <input type="text" id="nom"
+    placeholder="Entrez votre nom complet">
+
+    <h2>02 — Choix des documents</h2>
+<div id="listeDocuments">
+    Chargement des documents...
+</div>
+<p id="totalPanier" style="margin-top:15px; font-weight:bold; color:#073b78;">
+    Total : 0 FCFA
+</p>
+   
+    <button onclick="preparerCommande()">
+        Ajouter au panier
+    </button>
+</section>
+
+<section class="card" id="recap">
+    <h2>03 — Récapitulatif</h2>
+
+    <p><strong>Étudiant :</strong>
+    <span id="nomRecap"></span></p>
+
+    <br>
+    <p><strong>Documents sélectionnés :</strong></p>
+
+    <ul id="listeRecap" style="padding:20px;"></ul>
+<p id="totalRecap" style="font-weight:bold; color:#073b78; font-size:18px;">
+    Total : 0 FCFA
+</p>
+<br>
+
+    <p>Vérifiez votre commande avant confirmation.</p>
+
+    <button onclick="confirmerCommande()">
+        Confirmer ma commande
+    </button>
+
+    <button class="secondary" onclick="modifierCommande()">
+        Modifier ma commande
+    </button>
+
+    <p id="message"></p>
+</section>
+
+<!-- ESPACE ADMINISTRATEUR -->
+
+<section class="card">
+    <h2>04 — Espace administrateur</h2>
+
+    <div id="connexionAdmin">
+
+        <label for="emailAdmin">Adresse e-mail</label>
+        <input
+            type="email"
+            id="emailAdmin"
+            placeholder="admin@exemple.com"
+        >
+
+        <label for="motDePasseAdmin">Mot de passe</label>
+        <input
+    type="password"
+    id="motDePasseAdmin"
+    placeholder="Votre mot de passe"
+>
+
+<button type="button" class="secondary"
+onclick="afficherMotDePasse()">
+    Afficher le mot de passe
+</button>
+
+        <button onclick="connecterAdmin()">
+            Se connecter
+        </button>
+
+        <p id="messageAdmin"></p>
+
+    </div>
+
+    <div id="admin">
+
+        <h3>Commandes reçues</h3>
+
+        <p id="totalCommandes"></p>
+<hr style="margin: 20px 0;">
+
+<h3>Gestion des articles</h3>
+
+<br>
+
+<label for="nomArticle">Nom de l'article</label>
+<input
+    type="text"
+    id="nomArticle"
+    placeholder="Ex : Polycopié de mathématiques"
+>
+
+<label for="prixArticle">Prix (FCFA)</label>
+<input
+    type="number"
+    id="prixArticle"
+    min="0"
+    placeholder="Ex : 2000"
+    style="width:100%; padding:13px; margin-bottom:15px;"
+>
+
+<button onclick="enregistrerArticle()">
+    Ajouter l'article
+</button>
+
+<div id="listeArticles"></div>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                       <th>Étudiant</th>
+<th>Documents</th>
+<th>Prix total</th>
+<th>Statut</th>
+<th>Date</th>
+<th>Action</th>
+
+                    </tr>
+                </thead>
+
+                <tbody id="tableCommandes"></tbody>
+            </table>
+        </div>
+
+        <button onclick="telechargerCommandes()">
+            Télécharger les commandes
+        </button>
+
+        <button class="secondary" onclick="deconnecterAdmin()">
+            Se déconnecter
+        </button>
+
+    </div>
+</section>
+</main>
+
+<footer>
+    ENP Togo — Service de commandes de documents
+</footer>
+
+<script>
+function afficherMotDePasse() {
+
+    const champ = document.getElementById("motDePasseAdmin");
+
+    if (champ.type === "password") {
+        champ.type = "text";
+    } else {
+        champ.type = "password";
+    }
+}
+async function chargerArticles() {
+
+    const liste = document.getElementById("listeDocuments");
+
+    liste.textContent = "Connexion à la base de données...";
+
+    try {
+
+        const { data: articles, error } = await supabaseClient
+            .from("articles")
+            .select("id, nom, prix")
+            .eq("actif", true)
+            .order("nom");
+
+        if (error) {
+            console.error("Erreur Supabase :", error);
+            liste.textContent = "Erreur : " + error.message;
+            return;
+        }
+
+        liste.innerHTML = "";
+
+        if (!articles || articles.length === 0) {
+            liste.textContent = "Aucun document disponible.";
+            return;
+        }
+
+        articles.forEach(article => {
+
+            const bloc = document.createElement("div");
+            bloc.className = "document";
+
+            const label = document.createElement("label");
+            label.htmlFor = "article-" + article.id;
+
+            label.textContent =
+                article.nom + " — " +
+                article.prix.toLocaleString("fr-FR") + " FCFA";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = "article-" + article.id;
+            checkbox.value = article.nom;
+            checkbox.dataset.prix = article.prix;
+
+            checkbox.addEventListener("change", calculerTotal);
+
+            bloc.appendChild(label);
+            bloc.appendChild(checkbox);
+
+            liste.appendChild(bloc);
+        });
+
+        calculerTotal();
+
+    } catch (erreur) {
+
+        console.error("Erreur inattendue :", erreur);
+        liste.textContent = "Erreur : " + erreur.message;
+    }
+}function calculerTotal() {
+
+    const cases = document.querySelectorAll(
+        '.document input:checked'
+    );
+
+    let total = 0;
+
+    cases.forEach(element => {
+        total += Number(element.dataset.prix);
+    });
+
+    document.getElementById("totalPanier").textContent =
+        "Total : " + total.toLocaleString("fr-FR") + " FCFA";
+}
+async function preparerCommande() {
+    const nom = document.getElementById("nom").value.trim();
+
+    if (!nom) {
+        alert("Veuillez renseigner votre nom.");
+        return;
+    }
+const bouton = document.querySelector(
+    'button[onclick="preparerCommande()"]'
+);
+
+bouton.disabled = true;
+bouton.textContent = "Vérification en cours...";
+
+const autorise = await verifierEtudiant(nom);
+
+bouton.disabled = false;
+bouton.textContent = "Ajouter au panier";
+
+if (autorise === null) {
+    alert("Impossible de vérifier votre inscription. Réessayez.");
+    return;
+}
+
+if (!autorise) {
+    alert("Votre nom ne figure pas dans la liste des étudiants autorisés.");
+    return;
+}
+    const cases = document.querySelectorAll(
+        '.document input:checked'
+    );
+
+    if (cases.length === 0) {
+        alert("Choisissez au moins un document.");
+        return;
+    }
+
+    document.getElementById("nomRecap").textContent = nom;
+const total = Array.from(
+    document.querySelectorAll('.document input:checked')
+).reduce((somme, element) => {
+    return somme + Number(element.dataset.prix);
+}, 0);
+
+document.getElementById("totalRecap").textContent =
+    "Total : " + total.toLocaleString("fr-FR") + " FCFA";
+
+    const liste = document.getElementById("listeRecap");
+    liste.innerHTML = "";
+
+    cases.forEach(element => {
+        const li = document.createElement("li");
+        li.textContent = element.value;
+        liste.appendChild(li);
+    });
+
+    document.getElementById("recap").style.display = "block";
+
+    document.getElementById("recap").scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+async function confirmerCommande() {
+
+    const nom = document.getElementById("nom").value.trim();
+
+    const documents = Array.from(
+        document.querySelectorAll('.document input:checked')
+    ).map(element => element.value);
+
+    if (!nom || documents.length === 0) {
+        alert("Commande invalide.");
+        return;
+    }
+
+    const bouton = document.querySelector(
+        'button[onclick="confirmerCommande()"]'
+    );
+
+    bouton.disabled = true;
+    bouton.textContent = "Enregistrement en cours...";
+
+    const { error } = await supabaseClient
+        .from("commandes")
+        .insert({
+            nom_etudiant: nom,
+            documents: documents,
+            statut: "En attente"
+        });
+
+    bouton.disabled = false;
+    bouton.textContent = "Confirmer ma commande";
+
+   if (error) {
+    console.error("Erreur d'enregistrement :", error);
+    alert("Erreur Supabase : " + error.message);
+    return;
+}
+    document.getElementById("message").textContent =
+        "Commande enregistrée avec succès !";
+
+    document.getElementById("message").style.color = "green";
+
+    document.querySelectorAll('.document input:checked')
+        .forEach(element => element.checked = false);
+
+    document.getElementById("nom").value = "";
+
+    document.getElementById("recap").style.display = "none";
+}
+function modifierCommande() {
+    document.getElementById("recap").style.display = "none";
+}
+async function afficherCommandes() {
+
+    const tableau = document.getElementById("tableCommandes");
+    const admin = document.getElementById("admin");
+const { data: articles, error: erreurArticles } = await supabaseClient
+    .from("articles")
+    .select("nom, prix");
+
+if (erreurArticles) {
+    console.error("Erreur de récupération des prix :", erreurArticles);
+    alert("Impossible de récupérer les prix des articles.");
+    return;
+}
+
+const prixArticles = Object.fromEntries(
+    articles.map(article => [article.nom, Number(article.prix)])
+);
+
+    tableau.innerHTML = "<tr><td colspan='6'>Chargement...</td></tr>";
+
+    admin.style.display = "block";
+
+    const { data: commandes, error } = await supabaseClient
+        .from("commandes")
+        .select("id, nom_etudiant, documents, statut, created_at")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Erreur de chargement :", error);
+
+        tableau.innerHTML =
+            "<tr><td colspan='6'>Impossible de charger les commandes.</td></tr>";
+
+        return;
+    }
+
+    tableau.innerHTML = "";
+
+    document.getElementById("totalCommandes").textContent =
+        "Nombre de commandes : " + commandes.length;
+
+    commandes.forEach(commande => {
+
+        const ligne = document.createElement("tr");
+
+        const date = new Date(commande.created_at)
+            .toLocaleString("fr-FR");
+
+const total = commande.documents.reduce(
+    (somme, nom) => somme + (prixArticles[nom] || 0),
+    0
+);
+
+[
+    commande.nom_etudiant,
+    commande.documents.join(", "),
+    total.toLocaleString("fr-FR") + " FCFA",
+    commande.statut,
+    date
+].forEach(texte => {            const cellule = document.createElement("td");
+            cellule.textContent = texte;
+            ligne.appendChild(cellule);
+
+        });
+
+        
+const celluleAction = document.createElement("td");
+
+        const select = document.createElement("select");
+
+        ["En attente", "En préparation", "Disponible", "Récupérée"]
+            .forEach(statut => {
+
+                const option = document.createElement("option");
+
+                option.value = statut;
+                option.textContent = statut;
+
+                if (statut === commande.statut) {
+                    option.selected = true;
+                }
+
+                select.appendChild(option);
+            });
+select.addEventListener("change", function() {
+
+    modifierStatut(commande.id, select.value);
+
+});
+
+        celluleAction.appendChild(select);
+        ligne.appendChild(celluleAction);
+tableau.appendChild(ligne);
+    });
+}
+async function modifierStatut(idCommande, nouveauStatut) {
+
+    const { error } = await supabaseClient
+        .from("commandes")
+        .update({
+            statut: nouveauStatut
+        })
+        .eq("id", idCommande);
+
+    if (error) {
+        console.error("Erreur de modification :", error);
+        alert("Impossible de modifier le statut.");
+
+        await afficherCommandes();
+        return;
+    }
+
+    console.log("Statut modifié avec succès !");
+}
+async function enregistrerArticle() {
+
+    const nom = document.getElementById("nomArticle").value.trim();
+    const prix = Number(document.getElementById("prixArticle").value);
+
+    if (!nom || document.getElementById("prixArticle").value === "" || !Number.isInteger(prix) || prix < 0) {
+        alert("Veuillez renseigner un nom et un prix valide.");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("articles")
+        .insert({
+            nom: nom,
+            prix: prix
+        });
+
+    if (error) {
+        console.error("Erreur article :", error);
+        alert("Impossible d'ajouter l'article : " + error.message);
+        return;
+    }
+
+    document.getElementById("nomArticle").value = "";
+    document.getElementById("prixArticle").value = "";
+
+    alert("Article ajouté avec succès !");
+
+    await afficherArticles();
+}
+
+async function afficherArticles() {
+
+    const liste = document.getElementById("listeArticles");
+
+    const { data: articles, error } = await supabaseClient
+        .from("articles")
+        .select("id, nom, prix, actif")
+        .order("nom");
+
+    if (error) {
+        console.error(error);
+        liste.textContent = "Impossible de charger les articles.";
+        return;
+    }
+
+    liste.innerHTML = "";
+
+    articles.forEach(article => {
+
+        const element = document.createElement("div");
+
+        element.style.padding = "15px 0";
+        element.style.borderBottom = "1px solid #ddd";
+
+        const titre = document.createElement("p");
+
+        titre.textContent =
+            article.nom + " — " +
+            article.prix.toLocaleString("fr-FR") +
+            " FCFA" +
+            (article.actif ? "" : " (Désactivé)");
+
+        element.appendChild(titre);
+
+        const modifier = document.createElement("button");
+
+        modifier.textContent = "Modifier";
+        modifier.onclick = () => modifierArticle(article);
+
+        element.appendChild(modifier);
+
+        const activer = document.createElement("button");
+
+        activer.textContent = article.actif
+            ? "Désactiver"
+            : "Réactiver";
+
+        activer.className = "secondary";
+
+        activer.onclick = () => changerEtatArticle(article);
+
+        element.appendChild(activer);
+
+        liste.appendChild(element);
+    });
+}
+async function afficherArticles() {
+
+    const liste = document.getElementById("listeArticles");
+
+    const { data: articles, error } = await supabaseClient
+        .from("articles")
+        .select("id, nom, prix, actif")
+        .order("nom");
+
+    if (error) {
+        console.error(error);
+        liste.textContent = "Impossible de charger les articles.";
+        return;
+    }
+
+    liste.innerHTML = "";
+
+    articles.forEach(article => {
+
+        const element = document.createElement("div");
+
+        element.style.padding = "15px 0";
+        element.style.borderBottom = "1px solid #ddd";
+
+        const titre = document.createElement("p");
+
+        titre.textContent =
+            article.nom + " — " +
+            article.prix.toLocaleString("fr-FR") +
+            " FCFA" +
+            (article.actif ? "" : " (Désactivé)");
+
+        element.appendChild(titre);
+
+        const modifier = document.createElement("button");
+
+        modifier.textContent = "Modifier";
+        modifier.onclick = () => modifierArticle(article);
+
+        element.appendChild(modifier);
+
+        const activer = document.createElement("button");
+
+        activer.textContent = article.actif
+            ? "Désactiver"
+            : "Réactiver";
+
+        activer.className = "secondary";
+
+        activer.onclick = () => changerEtatArticle(article);
+
+        element.appendChild(activer);
+
+        liste.appendChild(element);
+    });
+}
+async function modifierArticle(article) {
+
+    const nom = prompt("Nouveau nom de l'article :", article.nom);
+
+    if (nom === null || !nom.trim()) return;
+
+    const prixSaisi = prompt("Nouveau prix en FCFA :", article.prix);
+
+    if (prixSaisi === null) return;
+
+    const prix = Number(prixSaisi);
+
+    if (prixSaisi.trim() === "" || !Number.isInteger(prix) || prix < 0) {
+        alert("Prix invalide.");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("articles")
+        .update({
+            nom: nom.trim(),
+            prix: prix
+        })
+        .eq("id", article.id);
+
+    if (error) {
+        console.error("Erreur de modification :", error);
+        alert("Impossible de modifier : " + error.message);
+        return;
+    }
+
+    alert("Article modifié avec succès !");
+
+    await afficherArticles();
+}
+async function changerEtatArticle(article) {
+
+    const nouvelEtat = !article.actif;
+
+    const { error } = await supabaseClient
+        .from("articles")
+        .update({ actif: nouvelEtat })
+        .eq("id", article.id);
+
+    if (error) {
+        console.error("Erreur de changement d'état :", error);
+        alert("Impossible de modifier l'état : " + error.message);
+        return;
+    }
+
+    alert(nouvelEtat ? "Article réactivé !" : "Article désactivé !");
+
+    await afficherArticles();
+}
+async function telechargerCommandes() {
+
+    const { data: commandes, error } = await supabaseClient
+        .from("commandes")
+        .select("nom_etudiant, documents, statut, created_at")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Erreur d'export :", error);
+        alert("Impossible de récupérer les commandes.");
+        return;
+    }
+
+    if (commandes.length === 0) {
+        alert("Aucune commande à télécharger.");
+        return;
+    }
+
+    let csv = "Nom,Documents,Statut,Date\n";
+
+    commandes.forEach(c => {
+
+        const date = new Date(c.created_at).toLocaleString("fr-FR");
+
+        const ligne = [
+            c.nom_etudiant,
+            c.documents.join(" | "),
+            c.statut,
+            date
+        ]
+        .map(v => '"' + String(v).replace(/"/g, '""') + '"')
+        .join(",");
+
+        csv += ligne + "\n";
+    });
+
+    const fichier = new Blob(
+        ["\uFEFF" + csv],
+        { type: "text/csv;charset=utf-8;" }
+    );
+
+    const lien = document.createElement("a");
+    const url = URL.createObjectURL(fichier);
+
+    lien.href = url;
+    lien.download = "Commandes_ENP.csv";
+    lien.click();
+
+    URL.revokeObjectURL(url);
+}
+</script>
+<script>
+   
+   const SUPABASE_URL = "https://goigkytzfuamkgohdqwo.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_th-V0EY5MQPUgPGlTjBdYA_MPskA-hl";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+console.log("Connexion Supabase initialisée !");
+
+// Vérification de l'étudiant
+async function verifierEtudiant(nomComplet) {
+
+    const { data, error } = await supabaseClient.rpc(
+        "verifier_etudiant",
+        {
+            nom_saisi: nomComplet.trim()
+        }
+    );
+
+    if (error) {
+        console.error("Erreur Supabase :", error);
+        return null;
+    }
+
+    return data === true; }
+// Connexion de l'administrateur
+async function connecterAdmin() {
+
+    const email = document.getElementById("emailAdmin").value.trim();
+    const motDePasse = document.getElementById("motDePasseAdmin").value;
+
+    const message = document.getElementById("messageAdmin");
+
+    if (!email || !motDePasse) {
+        message.textContent = "Veuillez remplir tous les champs.";
+        message.style.color = "red";
+        return;
+    }
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: motDePasse
+    });
+
+    if (error) {
+        console.error("Erreur de connexion :", error);
+        message.textContent = "Identifiants incorrects ou erreur de connexion.";
+        message.style.color = "red";
+        return;
+    }
+
+if (data.user.id !== "9bf17c76-c1af-4869-89d3-852c8097d83e") {
+
+    await supabaseClient.auth.signOut();
+
+    message.textContent = "Accès réservé à l'administrateur.";
+    message.style.color = "red";
+
+    return;
+}
+
+message.textContent = "Connexion réussie !";
+message.style.color = "green";
+
+document.getElementById("connexionAdmin").style.display = "none";
+
+await afficherCommandes();
+await afficherArticles();
+
+console.log("Administrateur connecté :", data.user.id);
+}
+
+// Déconnexion
+async function deconnecterAdmin() {
+
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        console.error("Erreur de déconnexion :", error);
+        alert("Impossible de se déconnecter.");
+        return;
+    }
+
+    document.getElementById("admin").style.display = "none";
+    document.getElementById("connexionAdmin").style.display = "block";
+    document.getElementById("messageAdmin").textContent =
+        "Vous êtes déconnecté.";
+}
+chargerArticles();
+</script>
+</body>
+</html>
