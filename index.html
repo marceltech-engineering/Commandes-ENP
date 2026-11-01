@@ -439,9 +439,9 @@ async function chargerArticles() {
             const label = document.createElement("label");
             label.htmlFor = "article-" + article.id;
 
-            label.textContent =
-                article.nom + " — " +
-                prix + " FCFA";
+           llabel.textContent =
+    article.nom + " — " +
+    Number(article.prix).toLocaleString("fr-FR") + " FCFA";
 
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
