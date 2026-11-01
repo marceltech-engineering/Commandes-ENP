@@ -230,6 +230,8 @@ footer {
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -906,7 +908,7 @@ async function telechargerCommandes() {
 
     const { data: commandes, error } = await supabaseClient
         .from("commandes")
-        .select("nom_etudiant, documents, statut, created_at")
+        .select("nom_etudiant, documents")
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -915,42 +917,59 @@ async function telechargerCommandes() {
         return;
     }
 
-    if (commandes.length === 0) {
+    if (!commandes || commandes.length === 0) {
         alert("Aucune commande à télécharger.");
         return;
     }
 
-    let csv = "Nom,Documents,Statut,Date\n";
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    commandes.forEach(c => {
+    doc.setFontSize(18);
+    doc.text("COMMANDES ENP", 105, 18, { align: "center" });
 
-        const date = new Date(c.created_at).toLocaleString("fr-FR");
+    const lignes = commandes.map(c => {
+        const documents = Array.isArray(c.documents)
+            ? c.documents
+            : [];
 
-        const ligne = [
+        const commande = documents.join(" | ");
+
+        const prix = documents.reduce((total, nom) => {
+            const article = articlesDisponibles.find(
+                a => a.nom === nom
+            );
+            return total + (article ? Number(article.prix) : 0);
+        }, 0);
+
+        return [
             c.nom_etudiant,
-            c.documents.join(" | "),
-            c.statut,
-            date
-        ]
-        .map(v => '"' + String(v).replace(/"/g, '""') + '"')
-        .join(",");
-
-        csv += ligne + "\n";
+            commande,
+            prix.toLocaleString("fr-FR") + " FCFA"
+        ];
     });
 
-    const fichier = new Blob(
-        ["\uFEFF" + csv],
-        { type: "text/csv;charset=utf-8;" }
-    );
+    doc.autoTable({
+        startY: 28,
+        head: [["NOM", "COMMANDE", "PRIX"]],
+        body: lignes,
+        theme: "grid",
+        styles: {
+            fontSize: 9,
+            cellPadding: 4
+        },
+        headStyles: {
+            fillColor: [30, 60, 100],
+            textColor: 255
+        },
+        columnStyles: {
+            0: { cellWidth: 50 },
+            1: { cellWidth: 85 },
+            2: { cellWidth: 45 }
+        }
+    });
 
-    const lien = document.createElement("a");
-    const url = URL.createObjectURL(fichier);
-
-    lien.href = url;
-    lien.download = "Commandes_ENP.csv";
-    lien.click();
-
-    URL.revokeObjectURL(url);
+    doc.save("Commandes_ENP.pdf");
 }
 </script>
 <script>
