@@ -951,16 +951,21 @@ async function telechargerCommandes() {
 
         const commande = documents.join(" | ");
 
-        const prix = documents.reduce((total, nom) => {
-            const article = articles.find(a => a.nom === nom);
-            return total + (article ? Number(article.prix) : 0);
-        }, 0);
+     let prixTotal = 0;
 
-        return [
-            c.nom_etudiant,
-            commande,
-            String(Math.round(prix)) + " FCFA"
-        ];
+documents.forEach(nom => {
+    const article = articles.find(a => a.nom === nom);
+
+    if (article) {
+        prixTotal += Number(article.prix);
+    }
+});
+
+return [
+    c.nom_etudiant,
+    commande,
+    String(Math.round(prixTotal)) + " FCFA"
+];
     });
 
     doc.autoTable({
