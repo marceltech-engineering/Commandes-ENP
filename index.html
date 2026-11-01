@@ -629,12 +629,16 @@ const prixArticles = Object.fromEntries(
         return;
     }
 
-    tableau.innerHTML = "";
+   tableau.innerHTML = "";
 
-    document.getElementById("totalCommandes").textContent =
-        "Nombre de commandes : " + commandes.length;
+const commandesActives = commandes.filter(
+    commande => commande.statut !== "Récupérée"
+);
 
-    commandes.forEach(commande => {
+document.getElementById("totalCommandes").textContent =
+    "Nombre de commandes : " + commandesActives.length;
+
+commandesActives.forEach(commande => {
 
         const ligne = document.createElement("tr");
 
@@ -907,9 +911,10 @@ async function changerEtatArticle(article) {
 async function telechargerCommandes() {
 
     const { data: commandes, error: erreurCommandes } = await supabaseClient
-        .from("commandes")
-        .select("nom_etudiant, documents")
-        .order("created_at", { ascending: false });
+    .from("commandes")
+    .select("nom_etudiant, documents")
+    .neq("statut", "Récupérée")
+    .order("created_at", { ascending: false });
 
     if (erreurCommandes) {
         console.error(erreurCommandes);
