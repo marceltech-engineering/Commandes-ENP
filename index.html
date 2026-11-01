@@ -906,19 +906,30 @@ async function changerEtatArticle(article) {
 }
 async function telechargerCommandes() {
 
-    const { data: commandes, error } = await supabaseClient
+    const { data: commandes, error: erreurCommandes } = await supabaseClient
         .from("commandes")
         .select("nom_etudiant, documents")
         .order("created_at", { ascending: false });
 
-    if (error) {
-        console.error("Erreur d'export :", error);
+    if (erreurCommandes) {
+        console.error(erreurCommandes);
         alert("Impossible de récupérer les commandes.");
         return;
     }
 
     if (!commandes || commandes.length === 0) {
         alert("Aucune commande à télécharger.");
+        return;
+    }
+
+    const { data: articles, error: erreurArticles } = await supabaseClient
+        .from("articles")
+        .select("nom, prix")
+        .eq("actif", true);
+
+    if (erreurArticles) {
+        console.error(erreurArticles);
+        alert("Impossible de récupérer les prix des articles.");
         return;
     }
 
@@ -936,9 +947,7 @@ async function telechargerCommandes() {
         const commande = documents.join(" | ");
 
         const prix = documents.reduce((total, nom) => {
-            const article = articlesDisponibles.find(
-                a => a.nom === nom
-            );
+            const article = articles.find(a => a.nom === nom);
             return total + (article ? Number(article.prix) : 0);
         }, 0);
 
@@ -961,11 +970,6 @@ async function telechargerCommandes() {
         headStyles: {
             fillColor: [30, 60, 100],
             textColor: 255
-        },
-        columnStyles: {
-            0: { cellWidth: 50 },
-            1: { cellWidth: 85 },
-            2: { cellWidth: 45 }
         }
     });
 
